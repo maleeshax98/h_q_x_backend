@@ -5,7 +5,7 @@ const cors = require("cors")
 const mongoose = require("mongoose")
 const userRoutes = require("./routes/userRoutes")
 const quizRoutes = require("./routes/quizRoutes")
-
+const postsRoutes = require("./routes/postsRoutes")
 const app = express()
 
 app.use(cors());
@@ -13,6 +13,7 @@ app.use(express.json())
 
 app.use("/api/user", userRoutes)
 app.use("/api/quizes", quizRoutes)
+app.use("/api/posts", postsRoutes)
 
 
 mongoose.connect(process.env.MONGO_URI, {

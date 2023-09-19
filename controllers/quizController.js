@@ -1,7 +1,7 @@
 const mongoose = require("mongoose")
 const Quiz = require("../models/quizModel")
 const User = require("../models/userModel")
-
+const axios = require("axios")
 
 const getAllQuizes = async (req, res) => {
     try {
@@ -60,6 +60,28 @@ const addQuiz = async (req, res) => {
         }
         const quiz = await Quiz.create(data)
 
+        const now = new Date();
+        const options = {
+          year: 'numeric',
+          month: 'numeric',
+          day: 'numeric',
+          hour: 'numeric',
+          minute: 'numeric',
+          hour12: true, // Use 12-hour time format
+        };
+        const formattedDate = now.toLocaleDateString('en-US', options);
+        const formattedTime = now.toLocaleTimeString('en-US', options);
+        // Combine date and time into the desired format
+        const formattedDateTime = `${formattedDate} ${formattedTime}`;
+
+        const alertMobile = await axios.get("https://app.nativenotify.com/api/notification", {
+            appId: 12221,
+            appToken: "2da6vucGsKaFh4FbTibSQo",
+            title: q,
+            body: "Visit app and answer to the quiz.",
+            dateSent: formattedDateTime,
+        })
+        
         return res.status(201).json(quiz)
 
     } catch(err){
@@ -93,8 +115,8 @@ const updateQuiz = async (req, res) => {
     // direct request handle please
 
     const { id, } = req.user
-    const {  docId, correctAnswer, answer  } = req.body
     
+    const {  docId, correctAnswer, answer  } = req.body
     let state = ''
     
     if(!mongoose.Types.ObjectId.isValid(id)){
@@ -124,7 +146,7 @@ const updateQuiz = async (req, res) => {
                 { $addToSet: { correct: id } }, // Update operation
                 { new: true } // Option to return the updated document
             )
-            console.log(quiz)
+            // console.log(quiz)
             const userWins = await User.findOne({_id: id}).select("wins")
             // const newValue
             const user = await User.findOneAndUpdate(
@@ -141,7 +163,7 @@ const updateQuiz = async (req, res) => {
                 { $addToSet: { faild: id } }, // Update operation
                 { new: true } // Option to return the updated document
             )
-            console.log(quiz)
+            // console.log(quiz)
             return res.status(201).json(quiz)
         } else {
             return res.status(400).json({error: "Somthing went wrong"})
